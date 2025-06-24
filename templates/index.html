@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv8 Object Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Cosmic Background */
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            background: radial-gradient(ellipse at center, #1a0d2e 0%, #0f051a 30%, #0a0a0f 70%);
+        }
+
+        /* Nebula Effects */
+        .nebula {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.6;
+            background: 
+                radial-gradient(ellipse 800px 600px at 20% 20%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse 600px 400px at 80% 80%, rgba(0, 100, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 400px 300px at 60% 40%, rgba(255, 20, 147, 0.1) 0%, transparent 50%);
+            animation: nebulaShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes nebulaShift {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(2deg) scale(1.05); }
+        }
+
+        /* Rotating Galaxy Center */
+        .galaxy-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            transform: translate(-50%, -50%);
+            z-index: -2;
+            opacity: 0.3;
+        }
+
+        .galaxy-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid;
+            animation: galaxyRotate 30s linear infinite;
+        }
+
+        .ring-1 {
+            width: 100%;
+            height: 100%;
+            border-color: rgba(138, 43, 226, 0.3);
+            animation-duration: 40s;
+        }
+
+        .ring-2 {
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-color: rgba(0, 100, 255, 0.4);
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+
+        .ring-3 {
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            border-color: rgba(255, 20, 147, 0.5);
+            animation-duration: 20s;
+        }
+
+        .ring-4 {
+            width: 40%;
+            height: 40%;
+            top: 30%;
+            left: 30%;
+            border-color: rgba(0, 255, 255, 0.6);
+            animation-duration: 15s;
+            animation-direction: reverse;
+        }
+
+        .galaxy-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(0, 255, 255, 0.4) 50%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            animation: coreGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes galaxyRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes coreGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+            100% { box-shadow: 0 0 40px rgba(0, 255, 255, 1), 0 0 60px rgba(255, 255, 255, 0.5); }
+        }
+
+        /* Particle System */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        .particle.glow {
+            box-shadow: 0 0 6px rgba(0, 255, 255, 0.8);
+            background: rgba(0, 255, 255, 0.9);
+        }
+
+        .particle.purple {
+            background: rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 4px rgba(138, 43, 226, 0.6);
+        }
+
+        .particle.pink {
+            background: rgba(255, 20, 147, 0.8);
+            box-shadow: 0 0 4px rgba(255, 20, 147, 0.6);
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { 
+                transform: translateY(0px) translateX(0px);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translateY(-20px) translateX(10px);
+                opacity: 1;
+            }
+        }
+
+        /* Starfield */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: starTwinkle 4s ease-in-out infinite;
+        }
+
+        .star.bright {
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Realistic Rocket */
+        .rocket {
+            position: fixed;
+            width: 60px;
+            height: 8px;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .rocket-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #d4d4d4 0%, #ffffff 30%, #f0f0f0 70%, #c0c0c0 100%);
+            border-radius: 0 4px 4px 0;
+            position: relative;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .rocket-body::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            border-right: 12px solid #b0b0b0;
+        }
+
+        .rocket-body::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 2px;
+            background: #ff4444;
+            border-radius: 50%;
+            box-shadow: 0 0 4px #ff4444;
+        }
+
+        .rocket-trail {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 150, 255, 0.8) 30%, rgba(255, 255, 255, 0.9) 70%, rgba(255, 100, 0, 0.8) 100%);
+            border-radius: 1px;
+            animation: trailFlicker 0.1s ease-in-out infinite alternate;
+        }
+
+        @keyframes trailFlicker {
+            0% { opacity: 0.8; width: 35px; }
+            100% { opacity: 1; width: 45px; }
+        }
+
+        .rocket-flight {
+            animation: rocketTrajectory 25s linear infinite;
+        }
+
+        @keyframes rocketTrajectory {
+            0% {
+                opacity: 0;
+                transform: translateX(-100px) translateY(0px) rotate(0deg);
+            }
+            2% {
+                opacity: 1;
+            }
+            15% {
+                transform: translateX(50vw) translateY(-20px) rotate(2deg);
+            }
+            30% {
+                transform: translateX(100vw) translateY(-40px) rotate(-1deg);
+            }
+            35% {
+                opacity: 1;
+            }
+            40% {
+                opacity: 0;
+                transform: translateX(120vw) translateY(-50px) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(120vw) translateY(-50px) rotate(0deg);
+            }
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detection-panel {
+            background: rgba(20, 20, 30, 0.3);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 60px 50px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detection-panel:hover {
+            border-color: rgba(0, 255, 255, 0.2);
+            box-shadow: 
+                0 12px 48px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            position: relative;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent);
+            animation: lineGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes lineGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; box-shadow: 0 0 10px rgba(0, 255, 255, 0.6); }
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .file-input-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 30px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-content {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .file-input-content .icon {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .predict-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 16px 40px;
+            font-size: 0.95rem;
+            font-weight: 400;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            min-width: 180px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .predict-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .predict-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .predict-btn:hover::before {
+            left: 100%;
+        }
+
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            margin-top: 50px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .result-image {
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 100%;
+            height: auto;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .result-image:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .detection-info {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .detection-info span {
+            color: #00ffff;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .detection-panel {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .galaxy-center {
+                width: 300px;
+                height: 300px;
+                opacity: 0.2;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .detection-panel {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .galaxy-center {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cosmic Background -->
+    <div class="cosmic-bg"></div>
+    <div class="nebula"></div>
+    
+    <!-- Rotating Galaxy Center -->
+    <div class="galaxy-center">
+        <div class="galaxy-ring ring-1"></div>
+        <div class="galaxy-ring ring-2"></div>
+        <div class="galaxy-ring ring-3"></div>
+        <div class="galaxy-ring ring-4"></div>
+        <div class="galaxy-core"></div>
+    </div>
+    
+    <!-- Particle System -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Starfield -->
+    <div class="starfield" id="starfield"></div>
+
+    <!-- Realistic Rocket -->
+    <div class="rocket rocket-flight" id="rocket">
+        <div class="rocket-body">
+            <div class="rocket-trail"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="detection-panel">
+            <h1>Object Detection</h1>
+            
+            <form class="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <label class="file-input-wrapper">
+                        <input type="file" name="image" id="imageInput" accept="image/*">
+                        <div class="file-input-content">
+                            <span class="icon">⬆</span>
+                            <span id="file-text">Select image file</span>
+                        </div>
+                    </label>
+                </div>
+                
+                <button type="submit" class="predict-btn">
+                    Analyze
+                </button>
+            </form>
+            
+            {% if result_img %}
+            <div class="result-section">
+                <h2>Results</h2>
+                <img src="{{ url_for('static', filename='output/' + result_img.split('/')[-1]) }}" 
+                     alt="Detection Result" 
+                     class="result-image" 
+                     width="500">
+                <div class="detection-info">
+                    {% if detections %}
+                        {% for detection in detections %}
+                            Detected Object: <span>{{ detection.class }}</span><br>
+                            Confidence: <span>{{ detection.confidence }}%</span><br><br>
+                        {% endfor %}
+                    {% else %}
+                        Detected Object: <span>Unknown</span><br>
+                        Confidence: <span>N/A</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // File input handling
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const fileText = document.getElementById('file-text');
+            if (e.target.files.length > 0) {
+                fileText.textContent = e.target.files[0].name;
+            } else {
+                fileText.textContent = 'Select image file';
+            }
+        });
+
+        // Generate particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random particle types
+                const rand = Math.random();
+                if (rand < 0.3) particle.classList.add('glow');
+                else if (rand < 0.6) particle.classList.add('purple');
+                else if (rand < 0.8) particle.classList.add('pink');
+                
+                // Random position
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Generate stars
+        function createStars() {
+            const starfield = document.getElementById('starfield');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                if (Math.random() < 0.3) star.classList.add('bright');
+                
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                
+                starfield.appendChild(star);
+            }
+        }
+
+        // Initialize
+        createParticles();
+        createStars();
+
+        // Randomize rocket timing
+        function randomizeRocket() {
+            const rocket = document.getElementById('rocket');
+            const randomDelay = Math.random() * 15 + 10; // 10-25 second random start
+            const randomY = Math.random() * 60 + 20; // Random vertical position (20-80% of screen)
+            
+            rocket.style.top = randomY + '%';
+            rocket.style.animationDelay = randomDelay + 's';
+        }
+
+        randomizeRocket();
+
+        // Mouse interaction with galaxy
+        document.addEventListener('mousemove', function(e) {
+            const galaxy = document.querySelector('.galaxy-center');
+            const mouseX = (e.clientX / window.innerWidth - 0.5) * 10;
+            const mouseY = (e.clientY / window.innerHeight - 0.5) * 10;
+            
+            galaxy.style.transform = `translate(-50%, -50%) translate(${mouseX}px, ${mouseY}px)`;
+        });
+    </script>
+</body>
+</html>

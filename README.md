@@ -95,6 +95,9 @@ Falcon_dataset_model/
 
 * ONNX format is recommended for faster, lightweight inference, especially during deployment.
 * This project is intended for local testing only. For production or public deployment, security hardening is required.
+* The website contains a Internal server failure due to huge data and low memory problem
+* The website will take least 50 sec to boot due to render inactivity free tier website
+
 
 ---
 

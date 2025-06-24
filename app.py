@@ -7,7 +7,6 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# Configuration
 UPLOAD_FOLDER = 'static/uploads'
 OUTPUT_FOLDER = 'static/output'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
@@ -19,13 +18,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Global model loading
-try:
-    model = YOLO('best.pt')
-except Exception as e:
-    print(f"Error loading YOLO model: {e}")
-    model = None
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -35,10 +27,6 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
-        flash('Model not loaded. Please check best.pt.')
-        return redirect(url_for('index'))
-
     if 'image' not in request.files:
         flash('No file selected')
         return redirect(url_for('index'))
@@ -51,6 +39,12 @@ def predict():
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
+
+    try:
+        model = YOLO('best.pt')
+    except Exception as e:
+        flash(f'Error loading model: {e}')
+        return redirect(url_for('index'))
 
     results = model.predict(filepath, conf=0.25, save=False)
 
@@ -91,4 +85,4 @@ def clear_results():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=10000)

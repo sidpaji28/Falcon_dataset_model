@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}AI Object Detection{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Ported Styles */
+    .cosmic-wrapper {
+        position: relative;
+        min-height: 90vh; /* Adjust for header */
+        overflow: hidden;
+    }
+
+    /* Cosmic Background - Scoped to wrapper or handled globally if desired */
+    .cosmic-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -3;
+        background: radial-gradient(ellipse at center, #1a0d2e 0%, #0f051a 30%, #0a0a0f 70%);
+    }
+
+    .detection-panel {
+        background: rgba(20, 20, 30, 0.5);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 60px 50px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        margin: 50px auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .file-input-wrapper {
+        display: block;
+        width: 100%;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px dashed rgba(0, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 30px 20px;
+        transition: all 0.3s ease;
+        color: #fff;
+    }
+
+    .file-input-wrapper:hover {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .predict-btn {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+        border: 1px solid var(--primary);
+        color: #ffffff;
+        padding: 16px 40px;
+        font-size: 1rem;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .predict-btn:hover {
+        background: var(--primary);
+        color: #000;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    }
+
+    .result-section {
+        margin-top: 40px;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .result-image {
+        max-width: 100%;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .detection-info {
+        margin-top: 20px;
+        text-align: left;
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .error-msg {
+        color: #ff4444;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cosmic-wrapper">
+    <!-- Cosmic Background Elements -->
+    <div class="cosmic-bg"></div>
+
+    <div class="container">
+        <div class="detection-panel">
+            <h1>Object Detection</h1>
+            <p style="margin-bottom: 2rem; color: #ccc;">Upload an image to detect objects using YOLOv8.</p>
+
+            {% if error %}
+            <div class="error-msg">{{ error }}</div>
+            {% endif %}
+
+            <form class="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <label class="file-input-wrapper">
+                        <input type="file" name="image" id="imageInput" accept="image/*" style="display: none;" required>
+                        <div class="file-input-content">
+                            <span class="icon" style="font-size: 2rem; display: block; margin-bottom: 10px;">⬆</span>
+                            <span id="file-text">Select image file</span>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit" class="predict-btn">
+                    Analyze Image
+                </button>
+            </form>
+
+            {% if result_img %}
+            <div class="result-section">
+                <h2>Results</h2>
+                <img src="/{{ result_img }}" alt="Detection Result" class="result-image">
+                <div class="detection-info">
+                    <h3>Detections:</h3>
+                    {% if detections %}
+                        <ul style="list-style: none; padding: 0;">
+                        {% for detection in detections %}
+                            <li style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                                <span style="color: var(--primary);">{{ detection.class }}</span>
+                                <span style="float: right; color: #aaa;">{{ detection.confidence }}%</span>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">Total: {{ total_detections }}</p>
+                    {% else %}
+                        <p>No objects detected.</p>
+                    {% endif %}
+                </div>
+                <div style="margin-top: 20px;">
+                    <a href="/tool/detection" class="btn">Try Another</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const fileText = document.getElementById('file-text');
+        if (e.target.files.length > 0) {
+            fileText.textContent = e.target.files[0].name;
+        } else {
+            fileText.textContent = 'Select image file';
+        }
+    });
+</script>
+{% endblock %}

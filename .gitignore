@@ -1,1 +1,15 @@
 venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+et/
+sql_app.db
+*.log
+.DS_Store
+static/uploads/*
+static/output/*
+!static/uploads/.gitkeep
+!static/output/.gitkeep

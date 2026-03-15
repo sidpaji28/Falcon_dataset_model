@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>HR Consultant Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8 font-sans">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <a href="index.html" class="text-blue-500 hover:underline mb-4 block">&larr; Back to Home</a>
+        <h1 class="text-3xl font-bold mb-4 border-b pb-2">HR Consultant Dashboard</h1>
+        <p class="text-gray-700 mb-6">Leverage the Agentic AI to generate powerful Boolean and X-Ray sourcing strings.</p>
+
+        <div class="p-6 border rounded bg-blue-50">
+            <h2 class="text-xl font-semibold mb-4">Sourcing Query Generator</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="text" id="role" placeholder="Role (e.g., Software Engineer)" class="p-2 border rounded" />
+                <input type="text" id="location" placeholder="Location (e.g., New York)" class="p-2 border rounded" />
+                <input type="text" id="skills" placeholder="Skills (comma separated)" class="p-2 border rounded md:col-span-2" />
+            </div>
+            <button id="generateBtn" class="px-6 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600">Generate X-Ray Queries</button>
+        </div>
+
+        <div id="results" class="mt-8 hidden">
+            <h3 class="font-bold text-xl mb-4 text-green-700">Generated Strings</h3>
+            <div class="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto font-mono text-sm">
+                <ul id="queryList" class="list-disc pl-5"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const role = document.getElementById('role').value || "Engineer";
+            const location = document.getElementById('location').value || "Remote";
+            const skillsRaw = document.getElementById('skills').value || "Python, React";
+            const skills = skillsRaw.split(',').map(s => s.trim());
+
+            document.getElementById('generateBtn').textContent = "Generating...";
+            document.getElementById('generateBtn').disabled = true;
+
+            try {
+                // We're re-using the start-search endpoint for HR query generation
+                const response = await fetch('/api/agent/start-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 'hr_consultant_01',
+                        role: role,
+                        location: location,
+                        experience: 'Any',
+                        skills: skills
+                    })
+                });
+
+                if (!response.ok) throw new Error("API failed");
+                const data = await response.json();
+
+                const ul = document.getElementById('queryList');
+                ul.innerHTML = '';
+
+                (data.xray_queries || []).forEach(q => {
+                    const li = document.createElement('li');
+                    li.textContent = q;
+                    li.className = "mb-2";
+                    ul.appendChild(li);
+                });
+
+                document.getElementById('results').classList.remove('hidden');
+
+            } catch(e) {
+                console.error(e);
+                alert("Generation failed.");
+            } finally {
+                document.getElementById('generateBtn').textContent = "Generate X-Ray Queries";
+                document.getElementById('generateBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

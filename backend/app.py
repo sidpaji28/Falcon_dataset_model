@@ -43,16 +43,6 @@ async def update_supabase(user_id: str, results: dict):
 # Initialize Background Service
 monitor_service = JobMonitorService(agent, db_update_callback=update_supabase)
 
-@app.on_event("startup")
-async def startup_event():
-    # Start the background job monitor
-    monitor_service.start()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    # Stop the background job monitor
-    monitor_service.stop()
-
 # ----- WebSocket Connections Manager -----
 class ConnectionManager:
     def __init__(self):
@@ -73,7 +63,19 @@ manager = ConnectionManager()
 
 # ----- Endpoints -----
 
-@app.post("/agent/analyze-cv", response_model=Dict[str, Any])
+@app.post("/api/agent/cron/monitor")
+async def trigger_monitor():
+    """
+    Endpoint designed to be called by a serverless Cron job (like Vercel Cron)
+    every 12 hours to trigger the background updates.
+    """
+    try:
+        processed = await monitor_service.run_monitoring_cycle()
+        return {"status": "success", "processed_users": processed}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/agent/analyze-cv", response_model=Dict[str, Any])
 async def analyze_cv(request: AgentAnalyzeCVRequest):
     """
     Endpoint 1: Analyze a user's CV to extract and expand skills.
@@ -84,7 +86,7 @@ async def analyze_cv(request: AgentAnalyzeCVRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/agent/start-search", response_model=Dict[str, Any])
+@app.post("/api/agent/start-search", response_model=Dict[str, Any])
 async def start_search(request: AgentStartSearchRequest):
     """
     Endpoint 2: Start generating queries and platform links, save to Supabase.
@@ -124,7 +126,7 @@ async def start_search(request: AgentStartSearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/agent/results/{user_id}", response_model=AgentResultResponse)
+@app.get("/api/agent/results/{user_id}", response_model=AgentResultResponse)
 async def get_results(user_id: str):
     """
     Endpoint 3: Get search results (simulating fetching saved jobs and scoring them).
@@ -166,7 +168,7 @@ async def get_results(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/agent/query-history/{user_id}", response_model=AgentQueryHistoryResponse)
+@app.get("/api/agent/query-history/{user_id}", response_model=AgentQueryHistoryResponse)
 async def get_query_history(user_id: str):
     """
     Endpoint 4: Retrieve the history of queries generated for the user.
@@ -180,7 +182,7 @@ async def get_query_history(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.websocket("/ws/agent-updates")
+@app.websocket("/api/ws/agent-updates")
 async def websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time updates.

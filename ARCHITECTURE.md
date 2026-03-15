@@ -29,7 +29,7 @@ The JSO Agent interacts with the four main dashboards by acting as a headless se
 We have chosen **Google Cloud / Google** as the primary AI infrastructure provider for the Agentic layer, specifically utilizing the **Gemini API**.
 
 **Infrastructure Design:**
-1. **Frontend (Next.js/React)**: Hosted on Vercel. Connects to the backend via standard REST APIs and WebSockets.
+1. **Frontend (HTML/CSS/JS)**: Static vanilla frontend hosted on Vercel using `@vercel/static`. Styled with Tailwind CSS CDN and connects to the backend via standard REST APIs using JS `fetch`.
 2. **Backend (Python/FastAPI)**: Hosted as serverless functions on Vercel (via `@vercel/python`). Executes the AI orchestration, background monitoring, and MCP security layer.
 3. **AI Provider (Gemini API / Vertex AI)**: Processes raw CV data, scores matches, and formulates queries using `gemini-1.5-flash` or `gemini-1.5-pro`.
 4. **Database (Supabase)**: Maintains user profiles, query history, job monitoring preferences, and licensing metrics.
@@ -42,23 +42,23 @@ We have chosen **Google Cloud / Google** as the primary AI infrastructure provid
 The new Phase-2 Agent is integrated seamlessly into the existing Phase-1 tech stack.
 
 ### Components
-* **Current Stack**: NextJS, React, NodeJS, Supabase, AWS S3, Google Cloud, Vercel.
+* **Current Stack**: NextJS, React, NodeJS, Supabase, AWS S3, Google Cloud, Vercel. (Refactored to static HTML/JS for this phase per constraint updates).
 * **New Agent Layer**: Python, FastAPI, Gemini API, Pydantic, MCP (Model Context Protocol) Guard.
 
 ### Connection Strategy
 1. **APIs**:
-   - Next.js (Phase-1) communicates with the new Python Agent (Phase-2) via FastAPI endpoints (e.g., `POST /api/agent/analyze-cv`).
+   - The Static HTML/JS Frontend communicates with the new Python Agent (Phase-2) via FastAPI endpoints (e.g., `POST /api/agent/analyze-cv`).
    - The Python Agent exposes standard JSON responses conforming to strict Pydantic models.
 
 2. **Event Triggers**:
-   - **Upload Event**: When a user uploads a CV to AWS S3 (via the Next.js/NodeJS stack), an event trigger (or standard webhook) calls the Python Agent, passing the S3 object key or extracted text.
+   - **Upload Event**: When a user inputs CV data into the frontend UI, it calls the Python Agent via API, passing the extracted text directly (or via S3 in full integration).
    - **Cron Trigger**: A Vercel Cron job or GCP Scheduler hits a secured endpoint on the Python backend every 12 hours to trigger the `JobMonitorService`.
 
 3. **Data Flow**:
-   - `User -> Next.js -> Uploads CV -> AWS S3`
-   - `Next.js -> Calls Python Agent -> MCP Guard sanitizes CV`
+   - `User -> HTML/JS UI -> Uploads CV Text (or File to AWS S3)`
+   - `HTML/JS UI -> Calls Python Agent -> MCP Guard sanitizes CV`
    - `Python Agent -> Gemini API extracts skills -> Supabase stores results`
-   - `Agent returns generated boolean queries -> Next.js displays links`
+   - `Agent returns generated boolean queries -> HTML/JS UI displays links`
 
 4. **MCP / APA for Security Protocols**:
    - We implement a security boundary via the **Model Context Protocol (MCP)** inside the Python layer.

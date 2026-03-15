@@ -15,6 +15,7 @@ from backend.models import (
 )
 from backend.agent import JobSearchAgent
 from backend.services.job_monitor_service import JobMonitorService
+from backend.db.supabase_client import supabase_client
 
 app = FastAPI(
     title="Phase-2 Agentic Job Search Optimization System",
@@ -86,9 +87,23 @@ async def analyze_cv(request: AgentAnalyzeCVRequest):
 @app.post("/agent/start-search", response_model=Dict[str, Any])
 async def start_search(request: AgentStartSearchRequest):
     """
-    Endpoint 2: Start generating queries and platform links.
+    Endpoint 2: Start generating queries and platform links, save to Supabase.
     """
     try:
+        # Insert preferences to Supabase
+        if supabase_client:
+            try:
+                data = {
+                    "user_id": request.user_id,
+                    "role": request.role,
+                    "location": request.location,
+                    "experience": request.experience,
+                    "skills": request.skills
+                }
+                supabase_client.table('user_preferences').upsert(data).execute()
+            except Exception as e:
+                logging.error(f"Failed to upsert preferences to Supabase: {e}")
+
         # Set user preferences first
         agent.set_user_preferences(
             user_id=request.user_id,

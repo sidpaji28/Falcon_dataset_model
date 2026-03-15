@@ -1,13 +1,13 @@
 from typing import List, Dict, Any
-from backend.llm.groq_client import GroqClient
+from backend.llm.gemini_client import GeminiClient
 
 class MatchScoreTool:
     """
     Tool to score job matches using LLM analysis.
     Based on weights: 0.4 skill match, 0.3 role relevance, 0.2 location, 0.1 experience.
     """
-    def __init__(self, groq_client: GroqClient):
-        self.groq_client = groq_client
+    def __init__(self, gemini_client: GeminiClient):
+        self.gemini_client = gemini_client
 
     async def score_job(self,
                   job_title: str,
@@ -24,7 +24,7 @@ class MatchScoreTool:
         Calculates the score and formats the result as a JobMatchResult dict.
         """
         # Call the LLM to get semantic analysis based on weights.
-        analysis = await self.groq_client.calculate_match_score(
+        analysis = await self.gemini_client.calculate_match_score(
             job_desc=job_description,
             user_skills=user_skills,
             user_role=user_role,

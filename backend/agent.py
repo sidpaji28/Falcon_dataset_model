@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from backend.llm.groq_client import GroqClient
+from backend.llm.gemini_client import GeminiClient
 from backend.security.mcp_guard import MCPGuard
 from backend.tools.skill_extractor_tool import SkillExtractorTool
 from backend.tools.query_engine_tool import QueryEngineTool
@@ -9,7 +9,7 @@ from backend.tools.match_score_tool import MatchScoreTool
 
 class JobSearchAgent:
     """
-    Phase-2 Agentic Job Search Optimization System using Groq LLM.
+    Phase-2 Agentic Job Search Optimization System using Gemini LLM.
     Responsibilities:
     1. Extract skills from CV
     2. Expand related skills
@@ -22,11 +22,11 @@ class JobSearchAgent:
     def __init__(self):
         # Tools & Services
         self.mcp_guard = MCPGuard()
-        self.groq_client = GroqClient()
-        self.skill_extractor = SkillExtractorTool(self.groq_client, self.mcp_guard)
-        self.query_engine = QueryEngineTool(self.groq_client)
+        self.gemini_client = GeminiClient()
+        self.skill_extractor = SkillExtractorTool(self.gemini_client, self.mcp_guard)
+        self.query_engine = QueryEngineTool(self.gemini_client)
         self.platform_query = PlatformQueryTool()
-        self.match_scorer = MatchScoreTool(self.groq_client)
+        self.match_scorer = MatchScoreTool(self.gemini_client)
 
         # State Management
         self.memory: Dict[str, Any] = {}

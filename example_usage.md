@@ -1,16 +1,25 @@
 # Phase-2 Agentic Job Search Optimization System
 
 ## Required Environment Variables
-Ensure you have set the Groq API key in your environment before running the server:
+Ensure you have set the Gemini API key and Supabase credentials in your environment before running the server:
 ```bash
-export GROQ_API_KEY="your_groq_api_key_here"
+export GEMINI_API_KEY="your_gemini_api_key_here"
+export SUPABASE_URL="https://your_supabase_project.supabase.co"
+export SUPABASE_KEY="your_supabase_anon_key"
 ```
 
 ## Running the Server
-You can start the FastAPI server using Uvicorn:
+You can start the FastAPI server locally using Uvicorn:
 ```bash
 uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+## Vercel Deployment
+To deploy this project to Vercel, you can use the Vercel CLI:
+```bash
+vercel deploy
+```
+Make sure to add the environment variables (`GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`) in your Vercel project settings.
 
 ## Example API Request: Start Search
 `POST /agent/start-search`

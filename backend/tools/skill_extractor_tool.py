@@ -1,13 +1,13 @@
 from typing import List
 from backend.security.mcp_guard import MCPGuard
-from backend.llm.groq_client import GroqClient
+from backend.llm.gemini_client import GeminiClient
 
 class SkillExtractorTool:
     """
-    Tool to extract skills from CV text using Groq LLM, guarded by MCPGuard.
+    Tool to extract skills from CV text using Gemini LLM, guarded by MCPGuard.
     """
-    def __init__(self, groq_client: GroqClient, mcp_guard: MCPGuard):
-        self.groq_client = groq_client
+    def __init__(self, gemini_client: GeminiClient, mcp_guard: MCPGuard):
+        self.gemini_client = gemini_client
         self.mcp_guard = mcp_guard
 
     async def extract_and_expand_skills(self, cv_text: str) -> dict:
@@ -18,10 +18,10 @@ class SkillExtractorTool:
         sanitized_cv = self.mcp_guard.sanitize_cv_text(cv_text)
 
         # 2. Extract Skills
-        base_skills = await self.groq_client.extract_skills_from_cv(sanitized_cv)
+        base_skills = await self.gemini_client.extract_skills_from_cv(sanitized_cv)
 
         # 3. Expand Skills
-        expanded_skills = await self.groq_client.expand_skills(base_skills)
+        expanded_skills = await self.gemini_client.expand_skills(base_skills)
 
         return {
             "base_skills": base_skills,

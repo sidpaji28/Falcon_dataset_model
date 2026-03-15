@@ -4,7 +4,7 @@ from typing import List
 class PlatformQueryTool:
     """
     Tool to generate specific job search links.
-    Supported platforms: LinkedIn, Indeed, Naukri, Glassdoor, Reed, Google X-Ray.
+    Supported platforms: LinkedIn, Indeed, Naukri, Glassdoor, Reed, TotalJobs, Google X-Ray.
     """
 
     @staticmethod
@@ -45,7 +45,12 @@ class PlatformQueryTool:
         reed_link = f"https://www.reed.co.uk/jobs/{encoded_role}-jobs-in-{encoded_location}"
         links.append(reed_link)
 
-        # 6. Google X-Ray (A basic example combining the role, location, and linkedin syntax)
+        # 6. TotalJobs
+        # Example format: https://www.totaljobs.com/jobs/role/in-location
+        totaljobs_link = f"https://www.totaljobs.com/jobs/{encoded_role}/in-{encoded_location}"
+        links.append(totaljobs_link)
+
+        # 7. Google X-Ray (A basic example combining the role, location, and linkedin syntax)
         xray_base = f'site:linkedin.com/jobs "{role}" AND "{location}"'
         xray_encoded = self._url_encode(xray_base)
         google_xray_link = f"https://www.google.com/search?q={xray_encoded}"

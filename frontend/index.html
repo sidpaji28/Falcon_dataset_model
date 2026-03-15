@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Job Search Optimization</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Include Google Fonts for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>JSO Platform</h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="switchDashboard('user')">User Dashboard</button>
+                <button class="nav-item" onclick="switchDashboard('hr')">HR Consultant</button>
+                <button class="nav-item" onclick="switchDashboard('admin')">Super Admin</button>
+                <button class="nav-item" onclick="switchDashboard('licensing')">Licensing</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <h1>Dashboard</h1>
+                <div class="user-profile">
+                    <span>Welcome, User</span>
+                </div>
+            </header>
+
+            <!-- Dynamic Dashboards Container -->
+            <div class="dashboard-container">
+
+                <!-- USER DASHBOARD -->
+                <section id="user-dashboard" class="dashboard-view active-dashboard">
+                    <div class="card form-card">
+                        <h3>Generate Job Queries</h3>
+                        <form id="query-form" onsubmit="event.preventDefault(); generateQueries();">
+                            <div class="form-group">
+                                <label for="role">Job Role</label>
+                                <input type="text" id="role" placeholder="e.g. Software Engineer" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="skills">Skills (comma-separated)</label>
+                                <input type="text" id="skills" placeholder="e.g. Python, React, SQL" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="experience">Experience</label>
+                                <input type="text" id="experience" placeholder="e.g. 5 years" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="e.g. New York, Remote" required>
+                            </div>
+                            <button type="submit" class="btn-primary" id="generate-btn">Generate Queries</button>
+                        </form>
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="spinner hidden"></div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="results-container" class="results-grid hidden">
+                        <!-- Cards injected by JS -->
+                    </div>
+                </section>
+
+                <!-- HR CONSULTANT DASHBOARD -->
+                <section id="hr-dashboard" class="dashboard-view hidden">
+                    <div class="card">
+                        <h3>Candidate Overview</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Candidate</th>
+                                    <th>Role</th>
+                                    <th>Generated Queries</th>
+                                    <th>Match Score</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Alice Smith</td>
+                                    <td>Data Scientist</td>
+                                    <td>6</td>
+                                    <td>92%</td>
+                                    <td><span class="badge active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Bob Jones</td>
+                                    <td>Frontend Dev</td>
+                                    <td>6</td>
+                                    <td>85%</td>
+                                    <td><span class="badge pending">Pending</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SUPER ADMIN DASHBOARD -->
+                <section id="admin-dashboard" class="dashboard-view hidden">
+                    <div class="analytics-grid">
+                        <div class="stat-card">
+                            <h4>Total Users</h4>
+                            <p class="stat-value">1,248</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Queries Generated</h4>
+                            <p class="stat-value">45,912</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Agent Usage</h4>
+                            <p class="stat-value">89%</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>System Health</h4>
+                            <p class="stat-value text-success">Optimal</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LICENSING DASHBOARD -->
+                <section id="licensing-dashboard" class="dashboard-view hidden">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <h3>Free</h3>
+                            <p class="price">$0/mo</p>
+                            <ul>
+                                <li>Basic Queries</li>
+                                <li>Standard Support</li>
+                            </ul>
+                            <button class="btn-outline">Current Plan</button>
+                        </div>
+                        <div class="pricing-card popular">
+                            <h3>Professional</h3>
+                            <p class="price">$49/mo</p>
+                            <ul>
+                                <li>Advanced Queries</li>
+                                <li>API Access</li>
+                                <li>Priority Support</li>
+                            </ul>
+                            <button class="btn-primary">Upgrade</button>
+                        </div>
+                        <div class="pricing-card">
+                            <h3>Enterprise</h3>
+                            <p class="price">Custom</p>
+                            <ul>
+                                <li>Unlimited Queries</li>
+                                <li>Custom Integrations</li>
+                                <li>24/7 Dedicated Support</li>
+                            </ul>
+                            <button class="btn-outline">Contact Us</button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">Notification message</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
